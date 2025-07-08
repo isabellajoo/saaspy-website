@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { collection, getDocs, orderBy, query, limit } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { getReviews } from "@/lib/actions";
 
 interface ReviewData {
   id: string;
@@ -62,31 +61,11 @@ export default function CustomerReviews() {
       try {
         console.log("🔄 Fetching reviews from Firebase...");
         
-        // Query approved reviews, ordered by submission date, limit to 6
-        const reviewsQuery = query(
-          collection(db, "customer_reviews"),
-          orderBy("submittedAt", "desc"),
-          limit(6)
-        );
+        const result = await getReviews();
         
-        const querySnapshot = await getDocs(reviewsQuery);
-        const firebaseReviews: ReviewData[] = [];
-        
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          firebaseReviews.push({
-            id: doc.id,
-            text: data.review,
-            name: data.name,
-            location: data.location,
-            avatar: `/avatar${(firebaseReviews.length % 3) + 1}.png`, // Cycle through avatar1-3
-            submittedAt: data.submittedAt
-          });
-        });
-
-        if (firebaseReviews.length > 0) {
-          console.log("✅ Successfully loaded reviews from Firebase:", firebaseReviews.length);
-          setReviews(firebaseReviews);
+        if (result.success && result.reviews.length > 0) {
+          console.log("✅ Successfully loaded reviews from Firebase:", result.reviews.length);
+          setReviews(result.reviews);
         } else {
           console.log("ℹ️ No reviews found in Firebase, showing empty state");
           setReviews([]);

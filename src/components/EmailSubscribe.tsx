@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { subscribeToNewsletter } from "@/lib/actions";
 import Toast from "@/components/Toast";
 
 const MAIN_COLOR = "#6CA8FF";
@@ -69,31 +68,23 @@ export default function EmailSubscribe() {
     try {
       console.log("🔄 Attempting to save to Firebase...");
       
-      // Add email to Firestore
-      const docRef = await addDoc(collection(db, "newsletter_subscribers"), {
-        email: email,
-        subscribedAt: serverTimestamp(),
-        status: "active"
-      });
-
-      console.log("✅ Email saved successfully!");
-      console.log("✅ Document ID:", docRef.id);
-      console.log("✅ Email:", email);
-      console.log("✅ Timestamp:", new Date().toISOString());
+      const result = await subscribeToNewsletter(email);
       
-      setToast({
-        message: "Successfully subscribed! Thank you for joining our newsletter.",
-        type: "success"
-      });
-      setEmail("");
+      if (result.success) {
+        setToast({
+          message: result.message,
+          type: "success"
+        });
+        setEmail("");
+      } else {
+        setToast({
+          message: result.message,
+          type: "error"
+        });
+      }
       
     } catch (error) {
-      console.error("❌ Error saving email to Firebase:", error);
-      console.error("❌ Error details:", {
-        message: error instanceof Error ? error.message : "Unknown error",
-        email: email,
-        timestamp: new Date().toISOString()
-      });
+      console.error("❌ Error during subscription:", error);
       
       setToast({
         message: "Sorry, there was an error. Please try again later.",

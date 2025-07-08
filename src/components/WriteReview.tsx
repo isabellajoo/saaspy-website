@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { submitReview } from "@/lib/actions";
 import Toast from "@/components/Toast";
 
 const MAIN_COLOR = "#6CA8FF";
@@ -83,33 +82,23 @@ export default function WriteReview() {
     try {
       console.log("🔄 Attempting to save review to Firebase...");
       
-      // Add review to Firestore
-      const docRef = await addDoc(collection(db, "customer_reviews"), {
-        name: formData.name,
-        location: formData.location,
-        review: formData.review,
-        submittedAt: serverTimestamp(),
-        status: "pending" // Can be used for moderation
-      });
-
-      console.log("✅ Review saved successfully!");
-      console.log("✅ Document ID:", docRef.id);
-      console.log("✅ Review data:", formData);
-      console.log("✅ Timestamp:", new Date().toISOString());
+      const result = await submitReview(formData);
       
-      setToast({
-        message: "Thank you for your review! It has been submitted successfully.",
-        type: "success"
-      });
-      setFormData({ name: "", location: "", review: "" });
+      if (result.success) {
+        setToast({
+          message: result.message,
+          type: "success"
+        });
+        setFormData({ name: "", location: "", review: "" });
+      } else {
+        setToast({
+          message: result.message,
+          type: "error"
+        });
+      }
       
     } catch (error) {
-      console.error("❌ Error saving review to Firebase:", error);
-      console.error("❌ Error details:", {
-        message: error instanceof Error ? error.message : "Unknown error",
-        formData: formData,
-        timestamp: new Date().toISOString()
-      });
+      console.error("❌ Error during review submission:", error);
       
       setToast({
         message: "Sorry, there was an error submitting your review. Please try again later.",
