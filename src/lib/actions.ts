@@ -3,30 +3,12 @@
 import { collection, addDoc, serverTimestamp, getDocs, orderBy, query, limit } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
-// Debug function to check environment variables
-function checkFirebaseConfig() {
-  const config = {
-    apiKey: process.env.FIREBASE_API_KEY ? "✓" : "✗",
-    authDomain: process.env.FIREBASE_AUTH_DOMAIN ? "✓" : "✗",
-    projectId: process.env.FIREBASE_PROJECT_ID ? "✓" : "✗",
-    storageBucket: process.env.FIREBASE_STORAGE_BUCKET ? "✓" : "✗",
-    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID ? "✓" : "✗",
-    appId: process.env.FIREBASE_APP_ID ? "✓" : "✗"
-  };
-  
-  console.log("🔧 Firebase Config Check:", config);
-  console.log("📍 Project ID:", process.env.FIREBASE_PROJECT_ID);
-  
-  return config;
-}
+
 
 export async function subscribeToNewsletter(email: string) {
   try {
     console.log("📧 Starting email subscription process...");
     console.log("📧 Email to save:", email);
-    
-    // Check Firebase configuration
-    checkFirebaseConfig();
 
     const docRef = await addDoc(collection(db, "newsletter_subscribers"), {
       email: email,
@@ -56,9 +38,6 @@ export async function submitReview(formData: { name: string; location: string; r
   try {
     console.log("📝 Starting review submission process...");
     console.log("📝 Review data:", formData);
-    
-    // Check Firebase configuration
-    checkFirebaseConfig();
 
     const docRef = await addDoc(collection(db, "customer_reviews"), {
       name: formData.name,
@@ -89,9 +68,6 @@ export async function submitReview(formData: { name: string; location: string; r
 export async function getReviews() {
   try {
     console.log("🔄 Fetching reviews from Firebase...");
-    
-    // Check Firebase configuration
-    checkFirebaseConfig();
 
     const reviewsQuery = query(
       collection(db, "customer_reviews"),
