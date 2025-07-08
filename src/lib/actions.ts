@@ -76,7 +76,14 @@ export async function getReviews() {
     );
 
     const querySnapshot = await getDocs(reviewsQuery);
-    const firebaseReviews: any[] = [];
+    const firebaseReviews: {
+      id: string;
+      text: string;
+      name: string;
+      location: string;
+      avatar: string;
+      submittedAt: unknown;
+    }[] = [];
 
     querySnapshot.forEach((doc) => {
       const data = doc.data();
